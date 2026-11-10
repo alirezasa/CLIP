@@ -1,0 +1,8 @@
+query,relevant images,base rate,P@5,P@10,AP
+A healthy retina with clear optic disc and blood vessels,grade 0 (No DR),0.45,1.0,0.8,0.4881491732947524
+A fundus image showing mild non-proliferative diabetic retinopathy with a few microaneurysms,grade 1 (Mild NPDR),0.11666666666666667,0.0,0.3,0.1158614618893695
+A fundus image showing moderate non-proliferative diabetic retinopathy with dot and blot hemorrhages and hard exudates,grade 2 (Moderate NPDR),0.195,0.2,0.2,0.21057757277255382
+"A fundus image showing severe non-proliferative diabetic retinopathy with extensive retinal hemorrhages, venous beading and cotton wool spots",grade 3 (Severe NPDR),0.17833333333333334,0.8,0.6,0.3130312215720301
+A fundus image showing severe proliferative diabetic retinopathy with neovascularization,grade 4 (PDR),0.06,0.2,0.2,0.07466556858254922
+A retina with many red hemorrhages and yellow hard exudates,grade >= 2 (lesions visible),0.43333333333333335,1.0,0.9,0.45381336458198906
+"A blurry, poor quality fundus photograph with artifacts and uneven illumination",poor image quality,0.52,0.4,0.4,0.49790850683116217
