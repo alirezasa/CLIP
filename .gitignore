@@ -1,0 +1,5 @@
+DeepDRiD/
+weights/
+.ipynb_checkpoints/
+__pycache__/
+outputs/image_embeddings.npy
