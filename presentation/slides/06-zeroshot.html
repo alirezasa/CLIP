@@ -1,0 +1,21 @@
+<section id="zeroshot" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۴ · تشخیص Zero-Shot</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;شباهت کسینوسی، ضریب دما و softmax</h2>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.5;color:#16233A;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:20px 32px;text-align:center">p(k | x) = softmax_k( 100 · cos( f_img(x), f_txt(t_k) ) )</p>
+<div style="display:flex;flex-direction:row-reverse;gap:40px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;نقش ضریب 100 برای یک تصویر سالم</h3>
+<table style="font-size:26px;color:#16233A;background:#FFFFFF;border-radius:12px;text-align:center">
+<tr><th style="width:24%">scale 100</th><th style="width:22%">scale 1</th><th style="width:20%">cosine</th><th style="width:34%;text-align:left">sentence</th></tr>
+<tr style="background:#E3F1EF"><td>0.739</td><td>0.205</td><td>0.372</td><td>No DR (true)</td></tr>
+<tr><td>0.019</td><td>0.197</td><td>0.335</td><td>Mild</td></tr>
+<tr><td>0.022</td><td>0.197</td><td>0.337</td><td>Moderate</td></tr>
+<tr><td>0.163</td><td>0.201</td><td>0.357</td><td>Severe</td></tr>
+<tr><td>0.058</td><td>0.199</td><td>0.347</td><td>PDR</td></tr>
+</table>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.65;color:#E6EAF0;background:#16233A;border-radius:16px;padding:28px 32px;text-align:left;white-space:nowrap">LOGIT_SCALE = model.logit_scale.exp().item()&nbsp;&nbsp;# 100<br><br>def zero_shot_probs(image_emb, text_emb,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scale=LOGIT_SCALE):<br>&nbsp;&nbsp;logits = scale * image_emb @ text_emb.T<br>&nbsp;&nbsp;return torch.softmax(logits, dim=-1)<br><br>probs = zero_shot_probs(emb_q, txt_desc)<br>pred&nbsp; = probs.argmax(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# (400,)</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>روش Zero-Shot در عمل فقط چند خط کد است. ماتریس بردار تصاویر پرس‌وجو، ۴۰۰ در ۵۱۲، در ترانهاده‌ی ماتریس بردار جمله‌ها، ۵ در ۵۱۲، ضرب می‌شود. چون بردارها نرمال‌اند، نتیجه یک ماتریس ۴۰۰ در ۵ از شباهت‌های کسینوسی است. این شباهت‌ها در ضریب logit_scale ضرب می‌شوند و روی هر سطر softmax گرفته می‌شود تا برای هر تصویر یک توزیع احتمال روی پنج جمله داشته باشیم؛ کلاس پیش‌بینی‌شده جمله‌ای است که بیشترین احتمال را دارد. ضریب ۱۰۰ از کجا آمده؟ این همان معکوس دمایی است که خود CLIP در آموزش یاد گرفته و من آن را از مدل خوانده‌ام. جدول سمت راست نشان می‌دهد چرا لازم است. برای یک تصویر سالم، شباهت کسینوسی با پنج جمله خیلی به هم نزدیک است: از ۰٫۳۳۵ تا ۰٫۳۷۲، یعنی اختلاف در حد چند صدم. اگر بدون ضریب softmax بگیریم، احتمال‌ها تقریباً یکنواخت می‌شوند، همه حدود بیست درصد. با ضریب ۱۰۰ همین اختلاف‌های کوچک به یک توزیع معنادار تبدیل می‌شود: ۷۴ درصد برای جمله‌ی سالم. نکته‌ی مهم این است که تغییر دما کلاس برنده را عوض نمی‌کند، چون ترتیب شباهت‌ها ثابت است؛ فقط میزان اطمینان توزیع را تغییر می‌دهد.</aside>
+</section>

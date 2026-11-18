@@ -1,0 +1,24 @@
+<section id="prompts" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۳ · پرامپت‌ها</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;سه نوع برچسب متنی برای هر درجه</h2>
+<div style="display:flex;flex-direction:row-reverse;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;A · برچسب ساده</h3>
+<p style="font-size:24px;line-height:1.6;color:#16233A;text-align:left">“a photo of moderate retinopathy”</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border:2px solid #0E7C7B;border-radius:16px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5;color:#0E7C7B">&#8235;B · جمله‌ی توصیفی پزشکی</h3>
+<p style="font-size:24px;line-height:1.6;color:#16233A;text-align:left">“A fundus image showing moderate non-proliferative diabetic retinopathy with dot and blot hemorrhages and hard exudates”</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;C · مجموعه‌ی توصیف‌ها</h3>
+<p style="font-size:28px;line-height:1.6;color:#4A5568">&#8235;سه جمله‌ی توصیفی برای هر درجه؛ بردار کلاس = میانگین نرمال‌شده‌ی آن‌ها.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px;align-items:center">
+<p style="flex:1;font-size:28px;line-height:1.7;color:#4A5568">&#8235;شباهت متن با متن: بردار جمله‌های ساده‌ی کلاس‌ها به هم خیلی نزدیک‌اند؛ جمله‌های توصیفی کلاس «سالم» را از بقیه دورتر می‌کنند.</p>
+<img src="../../outputs/text_similarity.png" alt="ماتریس شباهت کسینوسی بین بردار جمله‌های ساده و جمله‌های توصیفی" style="width:860px;height:324px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>ایده‌ی اصلی تمرین همین اسلاید است. برای هر کدام از پنج درجه‌ی بیماری سه نوع متن تعریف کردم تا اثر توصیف پزشکی را اندازه بگیرم. نوع A برچسب ساده است به سبک معمول Zero-Shot، مثل «a photo of moderate retinopathy». نوع B برای هر درجه یک جمله‌ی توصیفی است که علائم بالینی همان درجه را می‌گوید، همان‌طور که در متون چشم‌پزشکی می‌آید: برای سالم، دیسک اپتیک و رگ‌های واضح؛ برای خفیف، چند میکروآنوریسم؛ برای متوسط، خونریزی‌های نقطه‌ای و اگزودای سخت؛ برای شدید، خونریزی گسترده و venous beading؛ و برای پرولیفراتیو، رگ‌زایی جدید. سه جمله‌ی نمونه‌ی صورت تمرین هم در همین فهرست هستند. نوع C یک Prompt Ensemble است: برای هر درجه سه جمله‌ی توصیفی متفاوت، که بردارهایشان میانگین‌گیری و دوباره نرمال می‌شود تا یک بردار نماینده برای کلاس به دست آید. قبل از طبقه‌بندی، شباهت خود جمله‌ها با هم را هم رسم کردم که در تصویر پایین است. هر چه جمله‌های کلاس‌های مختلف در فضای CLIP از هم دورتر باشند، جدا کردن کلاس‌ها ساده‌تر است. جمله‌های ساده فقط در یک کلمه با هم فرق دارند و بردارهایشان خیلی به هم نزدیک است؛ جمله‌های توصیفی تمایز بیشتری ایجاد می‌کنند، مخصوصاً بین سالم و بیمار.</aside>
+</section>

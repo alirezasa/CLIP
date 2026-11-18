@@ -1,0 +1,21 @@
+<section id="cover" data-transition="fade" style="background:#16233A;color:#F7F5F0;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:28px;font-weight:700;color:#F2B544">&#8235;تمرین ۴ · ADL</p>
+<h1 style="font-size:96px;font-weight:700;line-height:1.3">&#8235;CLIP برای تشخیص Zero-Shot و جستجوی معنایی تصاویر شبکیه</h1>
+<p style="font-size:32px;line-height:1.7;color:#C9D3E0">&#8235;دیتاست DeepDRiD · درجه‌بندی رتینوپاتی دیابتی · بدون هیچ آموزشی</p>
+<div style="flex:1"></div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<p style="font-size:64px;font-weight:700;line-height:1.2">14% → 45%</p>
+<p style="font-size:28px;color:#C9D3E0">&#8235;دقت با برچسب ساده در برابر توصیف پزشکی</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<p style="font-size:64px;font-weight:700;line-height:1.2">0.51</p>
+<p style="font-size:28px;color:#C9D3E0">&#8235;میانگین Precision@5 در جستجوی متن → تصویر</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<p style="font-size:64px;font-weight:700;line-height:1.2">ViT-B/32</p>
+<p style="font-size:28px;color:#C9D3E0">&#8235;وزن‌های ثابت LAION-400M</p>
+</div>
+</div>
+<aside>سلام. در این تمرین از مدل CLIP استفاده کردم تا تصاویر شبکیه‌ی چشم را از نظر درجه‌ی رتینوپاتی دیابتی تحلیل کنم؛ هم به شکل تشخیص Zero-Shot و هم جستجوی معنایی. نکته‌ی اصلی تمرین این است که به جای برچسب‌های تک‌کلمه‌ای از جمله‌های توصیفی پزشکی استفاده شود. هیچ آموزشی انجام نمی‌شود؛ وزن‌های CLIP ثابت‌اند و کل نوت‌بوک روی CPU حدود سه دقیقه اجرا می‌شود. دو نتیجه‌ی اصلی این است: اول، توصیف پزشکی دقت Zero-Shot را از ۱۴ به ۴۵ درصد می‌رساند، یعنی سه برابر؛ ولی صادقانه باید بگویم این هنوز فقط کمی بهتر از حدس کلاس اکثریت است. دوم، جستجوی متن به تصویر بهتر کار می‌کند و میانگین Precision در پنج نتیجه‌ی اول ۰٫۵۱ است در برابر ۰٫۲۸ برای جستجوی تصادفی. به ترتیب داده، مدل، پرامپت‌ها، روش Zero-Shot و نتایج را توضیح می‌دهم.</aside>
+</section>
