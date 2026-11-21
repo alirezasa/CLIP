@@ -1,0 +1,273 @@
+<!doctype html><html lang="fa"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CLIP — ارائه‌ی تمرین ۴ (Zero-Shot پزشکی)</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"><style>
+body{margin:0;background:#2b2f36;font-family:'Vazirmatn',Tahoma,sans-serif}
+.wrap{max-width:1280px;margin:32px auto;padding:0 16px}
+.frame{width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.frame>section{width:1920px;height:1080px;box-sizing:border-box;position:absolute;left:0;top:0;transform-origin:0 0}
+section *{margin:0;box-sizing:border-box}
+section table{border-collapse:collapse}section td,section th{border:1px solid #E2DED5;padding:.35em .6em}
+section aside{display:none}
+x-shape{display:block;flex:none}
+x-shape[kind=arrow-right]{clip-path:polygon(0 30%,60% 30%,60% 0,100% 50%,60% 100%,60% 70%,0 70%)}
+.notes{direction:rtl;text-align:right;background:#F7F5F0;color:#16233A;border-radius:8px;padding:16px 24px;margin:12px 0 48px;font-size:17px;line-height:1.9}
+.notes b{color:#0E7C7B}
+</style></head><body><div class="wrap"><div class="frame"><section id="cover" data-transition="fade" style="background:#16233A;color:#F7F5F0;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:28px;font-weight:700;color:#F2B544">&#8235;تمرین ۴ · ADL</p>
+<h1 style="font-size:96px;font-weight:700;line-height:1.3">&#8235;CLIP برای تشخیص Zero-Shot و جستجوی معنایی تصاویر شبکیه</h1>
+<p style="font-size:32px;line-height:1.7;color:#C9D3E0">&#8235;دیتاست DeepDRiD · درجه‌بندی رتینوپاتی دیابتی · بدون هیچ آموزشی</p>
+<div style="flex:1"></div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<p style="font-size:64px;font-weight:700;line-height:1.2">14% → 45%</p>
+<p style="font-size:28px;color:#C9D3E0">&#8235;دقت با برچسب ساده در برابر توصیف پزشکی</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<p style="font-size:64px;font-weight:700;line-height:1.2">0.51</p>
+<p style="font-size:28px;color:#C9D3E0">&#8235;میانگین Precision@5 در جستجوی متن → تصویر</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<p style="font-size:64px;font-weight:700;line-height:1.2">ViT-B/32</p>
+<p style="font-size:28px;color:#C9D3E0">&#8235;وزن‌های ثابت LAION-400M</p>
+</div>
+</div>
+<aside>سلام. در این تمرین از مدل CLIP استفاده کردم تا تصاویر شبکیه‌ی چشم را از نظر درجه‌ی رتینوپاتی دیابتی تحلیل کنم؛ هم به شکل تشخیص Zero-Shot و هم جستجوی معنایی. نکته‌ی اصلی تمرین این است که به جای برچسب‌های تک‌کلمه‌ای از جمله‌های توصیفی پزشکی استفاده شود. هیچ آموزشی انجام نمی‌شود؛ وزن‌های CLIP ثابت‌اند و کل نوت‌بوک روی CPU حدود سه دقیقه اجرا می‌شود. دو نتیجه‌ی اصلی این است: اول، توصیف پزشکی دقت Zero-Shot را از ۱۴ به ۴۵ درصد می‌رساند، یعنی سه برابر؛ ولی صادقانه باید بگویم این هنوز فقط کمی بهتر از حدس کلاس اکثریت است. دوم، جستجوی متن به تصویر بهتر کار می‌کند و میانگین Precision در پنج نتیجه‌ی اول ۰٫۵۱ است در برابر ۰٫۲۸ برای جستجوی تصادفی. به ترتیب داده، مدل، پرامپت‌ها، روش Zero-Shot و نتایج را توضیح می‌دهم.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 1 — CLIP برای تشخیص Zero-Shot و جستجوی معنایی تصاویر شبکیه</b><br>سلام. در این تمرین از مدل CLIP استفاده کردم تا تصاویر شبکیه‌ی چشم را از نظر درجه‌ی رتینوپاتی دیابتی تحلیل کنم؛ هم به شکل تشخیص Zero-Shot و هم جستجوی معنایی. نکته‌ی اصلی تمرین این است که به جای برچسب‌های تک‌کلمه‌ای از جمله‌های توصیفی پزشکی استفاده شود. هیچ آموزشی انجام نمی‌شود؛ وزن‌های CLIP ثابت‌اند و کل نوت‌بوک روی CPU حدود سه دقیقه اجرا می‌شود. دو نتیجه‌ی اصلی این است: اول، توصیف پزشکی دقت Zero-Shot را از ۱۴ به ۴۵ درصد می‌رساند، یعنی سه برابر؛ ولی صادقانه باید بگویم این هنوز فقط کمی بهتر از حدس کلاس اکثریت است. دوم، جستجوی متن به تصویر بهتر کار می‌کند و میانگین Precision در پنج نتیجه‌ی اول ۰٫۵۱ است در برابر ۰٫۲۸ برای جستجوی تصادفی. به ترتیب داده، مدل، پرامپت‌ها، روش Zero-Shot و نتایج را توضیح می‌دهم.</div></div><div class="wrap"><div class="frame"><section id="data" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۱ · داده</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;دیتاست DeepDRiD و جدا کردن Query از Gallery</h2>
+<img src="../outputs/samples.png" alt="یک نمونه تصویر شبکیه از هر پنج درجه‌ی رتینوپاتی دیابتی" style="width:1664px;height:300px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+<div style="display:flex;flex-direction:row-reverse;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 32px">
+<p style="font-size:64px;font-weight:700;line-height:1.2;color:#0E7C7B">1,600</p>
+<p style="font-size:28px;line-height:1.6;color:#4A5568">&#8235;تصویر از 400 بیمار با درجه‌ی 0 تا 4</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 32px">
+<p style="font-size:64px;font-weight:700;line-height:1.2;color:#0E7C7B">400</p>
+<p style="font-size:28px;line-height:1.6;color:#4A5568">&#8235;Query: بخش validation رسمی (100 بیمار)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 32px">
+<p style="font-size:64px;font-weight:700;line-height:1.2;color:#0E7C7B">1,200</p>
+<p style="font-size:28px;line-height:1.6;color:#4A5568">&#8235;Gallery: بخش training رسمی (300 بیمار)</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>دیتاست DeepDRiD مربوط به چالش ISBI سال ۲۰۲۰ است و ۱۶۰۰ تصویر رنگی شبکیه از ۴۰۰ بیمار دارد. هر تصویر را چشم‌پزشک با درجه‌ی بین‌المللی رتینوپاتی دیابتی برچسب زده: صفر یعنی سالم، یک یعنی خفیف که فقط میکروآنوریسم دارد، دو متوسط با خونریزی‌های نقطه‌ای و اگزودای سخت، سه شدید با خونریزی گسترده، و چهار نوع پرولیفراتیو که رگ‌زایی جدید دارد. در تصویر یک نمونه از هر درجه دیده می‌شود و می‌بینید که تفاوت درجه‌ها، مخصوصاً درجه‌های پایین، خیلی ظریف است. یک ستون کیفیت تصویر هم داریم که در بخش جستجو از آن استفاده می‌کنم. چون CLIP به‌صورت Zero-Shot استفاده می‌شود داده‌ی آموزشی لازم نیست، ولی طبق صورت تمرین تصاویر را دو دسته کردم: بخش validation رسمی با ۴۰۰ تصویر نقش پرس‌وجو را دارد و تشخیص روی آن ارزیابی می‌شود؛ بخش training رسمی با ۱۲۰۰ تصویر گالری است که جستجو در آن انجام می‌شود. تقسیم در سطح بیمار است و با یک assert چک کرده‌ام که هیچ بیماری در هر دو دسته نباشد. توزیع کلاس‌ها نامتوازن است: ۴۳٫۵ درصد پرس‌وجوها سالم‌اند و فقط ۵ درصد درجه‌ی چهار؛ این عدد ۴۳٫۵ بعداً به‌عنوان خط پایه‌ی کلاس اکثریت مهم می‌شود.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 2 — دیتاست DeepDRiD و جدا کردن Query از Gallery</b><br>دیتاست DeepDRiD مربوط به چالش ISBI سال ۲۰۲۰ است و ۱۶۰۰ تصویر رنگی شبکیه از ۴۰۰ بیمار دارد. هر تصویر را چشم‌پزشک با درجه‌ی بین‌المللی رتینوپاتی دیابتی برچسب زده: صفر یعنی سالم، یک یعنی خفیف که فقط میکروآنوریسم دارد، دو متوسط با خونریزی‌های نقطه‌ای و اگزودای سخت، سه شدید با خونریزی گسترده، و چهار نوع پرولیفراتیو که رگ‌زایی جدید دارد. در تصویر یک نمونه از هر درجه دیده می‌شود و می‌بینید که تفاوت درجه‌ها، مخصوصاً درجه‌های پایین، خیلی ظریف است. یک ستون کیفیت تصویر هم داریم که در بخش جستجو از آن استفاده می‌کنم. چون CLIP به‌صورت Zero-Shot استفاده می‌شود داده‌ی آموزشی لازم نیست، ولی طبق صورت تمرین تصاویر را دو دسته کردم: بخش validation رسمی با ۴۰۰ تصویر نقش پرس‌وجو را دارد و تشخیص روی آن ارزیابی می‌شود؛ بخش training رسمی با ۱۲۰۰ تصویر گالری است که جستجو در آن انجام می‌شود. تقسیم در سطح بیمار است و با یک assert چک کرده‌ام که هیچ بیماری در هر دو دسته نباشد. توزیع کلاس‌ها نامتوازن است: ۴۳٫۵ درصد پرس‌وجوها سالم‌اند و فقط ۵ درصد درجه‌ی چهار؛ این عدد ۴۳٫۵ بعداً به‌عنوان خط پایه‌ی کلاس اکثریت مهم می‌شود.</div></div><div class="wrap"><div class="frame"><section id="clip" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۲ · مدل</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;معماری CLIP: دو رمزگذار، یک فضای مشترک</h2>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center;text-align:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:row;gap:12px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Image</p>
+<p style="font-size:24px;color:#4A5568">224×224</p>
+</div>
+<x-shape kind="arrow-right" style="width:28px;height:18px;background:#0E7C7B"></x-shape>
+<div style="flex:2;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Image Encoder</p>
+<p style="font-size:24px;color:#4A5568">ViT-B/32 · patch 32×32</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:12px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Text</p>
+<p style="font-size:24px;color:#4A5568">77 tokens</p>
+</div>
+<x-shape kind="arrow-right" style="width:28px;height:18px;background:#0E7C7B"></x-shape>
+<div style="flex:2;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Text Encoder</p>
+<p style="font-size:24px;color:#4A5568">Transformer</p>
+</div>
+</div>
+</div>
+<x-shape kind="arrow-right" style="width:36px;height:22px;background:#0E7C7B"></x-shape>
+<div style="width:380px;display:flex;flex-direction:column;gap:8px;background:#16233A;border-radius:16px;padding:36px 20px">
+<p style="font-size:32px;font-weight:700;color:#F7F5F0">512-d</p>
+<p style="font-size:24px;color:#C9D3E0">L2-normalized</p>
+<p style="font-size:24px;color:#F2B544;font-weight:700">cosine similarity</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;آموزش Contrastive</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;روی صدها میلیون زوج (تصویر، متن): بردار تصویر و متن متناظر به هم نزدیک، بقیه دور.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;نتیجه</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;طبقه‌بندی = مقایسه‌ی یک تصویر با چند جمله؛ جستجو = مقایسه‌ی یک جمله با چند تصویر.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;مدل استفاده‌شده</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;open_clip، 151.3M پارامتر، logit_scale = 100</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>CLIP از دو رمزگذار جدا تشکیل شده است. رمزگذار تصویر در اینجا یک Vision Transformer پایه با پچ‌های ۳۲ در ۳۲ است: تصویر ۲۲۴ در ۲۲۴ به ۴۹ پچ تقسیم می‌شود و مثل یک جمله از ترنسفورمر عبور می‌کند. رمزگذار متن هم یک ترنسفورمر است که جمله را تا ۷۷ توکن می‌گیرد. خروجی هر دو با یک لایه‌ی خطی به یک فضای مشترک ۵۱۲ بعدی نگاشت می‌شود. مدل با زیان Contrastive آموزش دیده: در هر batch از زوج‌های تصویر و متن، شباهت زوج‌های درست باید زیاد و شباهت همه‌ی ترکیب‌های غلط کم شود. نتیجه این است که شباهت کسینوسی بین بردار یک تصویر و بردار یک جمله، معیار تطابق آن دو است. با همین یک ایده، بدون هیچ آموزش اضافه، دو کار می‌شود کرد: اگر یک تصویر را با چند جمله مقایسه کنیم طبقه‌بندی Zero-Shot داریم، و اگر یک جمله را با چند تصویر مقایسه کنیم جستجوی معنایی. من از کتابخانه‌ی open_clip با همان معماری ViT-B/32 مدل اصلی و وزن‌های آموزش‌دیده روی LAION-400M استفاده کردم، چون به سرور وزن‌های OpenAI دسترسی نبود؛ با تغییر یک متغیر می‌شود وزن‌های OpenAI را هم بارگذاری کرد. مدل ۱۵۱ میلیون پارامتر دارد و ضریب logit_scale آن ۱۰۰ است که در اسلاید Zero-Shot توضیحش می‌دهم.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 3 — معماری CLIP: دو رمزگذار، یک فضای مشترک</b><br>CLIP از دو رمزگذار جدا تشکیل شده است. رمزگذار تصویر در اینجا یک Vision Transformer پایه با پچ‌های ۳۲ در ۳۲ است: تصویر ۲۲۴ در ۲۲۴ به ۴۹ پچ تقسیم می‌شود و مثل یک جمله از ترنسفورمر عبور می‌کند. رمزگذار متن هم یک ترنسفورمر است که جمله را تا ۷۷ توکن می‌گیرد. خروجی هر دو با یک لایه‌ی خطی به یک فضای مشترک ۵۱۲ بعدی نگاشت می‌شود. مدل با زیان Contrastive آموزش دیده: در هر batch از زوج‌های تصویر و متن، شباهت زوج‌های درست باید زیاد و شباهت همه‌ی ترکیب‌های غلط کم شود. نتیجه این است که شباهت کسینوسی بین بردار یک تصویر و بردار یک جمله، معیار تطابق آن دو است. با همین یک ایده، بدون هیچ آموزش اضافه، دو کار می‌شود کرد: اگر یک تصویر را با چند جمله مقایسه کنیم طبقه‌بندی Zero-Shot داریم، و اگر یک جمله را با چند تصویر مقایسه کنیم جستجوی معنایی. من از کتابخانه‌ی open_clip با همان معماری ViT-B/32 مدل اصلی و وزن‌های آموزش‌دیده روی LAION-400M استفاده کردم، چون به سرور وزن‌های OpenAI دسترسی نبود؛ با تغییر یک متغیر می‌شود وزن‌های OpenAI را هم بارگذاری کرد. مدل ۱۵۱ میلیون پارامتر دارد و ضریب logit_scale آن ۱۰۰ است که در اسلاید Zero-Shot توضیحش می‌دهم.</div></div><div class="wrap"><div class="frame"><section id="encode" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۲ · مدل</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;استخراج بردار ویژگی تصویر و متن</h2>
+<div style="display:flex;flex-direction:row-reverse;gap:40px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:22px;justify-content:center">
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;پیش‌پردازش استاندارد CLIP</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;تغییر اندازه به 224، برش مرکزی و نرمال‌سازی با میانگین و انحراف معیار CLIP.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;نرمال‌سازی L2</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;طول هر بردار 1 می‌شود؛ پس ضرب داخلی همان شباهت کسینوسی است.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;یک بار محاسبه</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;1,600 بردار در 112 ثانیه روی CPU ساخته و در فایل npy ذخیره می‌شوند.</p>
+</div>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.65;color:#E6EAF0;background:#16233A;border-radius:16px;padding:28px 32px;text-align:left;white-space:nowrap">model, _, preprocess = open_clip.create_model_and_transforms(<br>&nbsp;&nbsp;&nbsp;&nbsp;"ViT-B-32-quickgelu", pretrained=WEIGHTS)<br>model = model.to(device).eval()<br><br>@torch.no_grad()<br>def encode_images(paths):<br>&nbsp;&nbsp;for i in range(0, len(paths), BATCH_SIZE):<br>&nbsp;&nbsp;&nbsp;&nbsp;batch = torch.stack([preprocess(Image.open(p))<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for p in paths[i:i + BATCH_SIZE]])<br>&nbsp;&nbsp;&nbsp;&nbsp;feats.append(F.normalize(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model.encode_image(batch), dim=-1))<br><br>@torch.no_grad()<br>def encode_texts(sentences):<br>&nbsp;&nbsp;tokens = tokenizer(list(sentences))<br>&nbsp;&nbsp;return F.normalize(model.encode_text(tokens), dim=-1)</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>این بخش کد، پایه‌ی همه‌ی مراحل بعدی است. خط اول مدل و تابع پیش‌پردازش را از open_clip می‌سازد و مدل را در حالت eval می‌گذارد، چون قرار نیست چیزی آموزش ببیند. دو تابع کمکی نوشتم. encode_images فهرست مسیر تصاویر را دسته‌دسته می‌خواند، پیش‌پردازش استاندارد CLIP را اعمال می‌کند، یعنی تغییر اندازه به ۲۲۴ و برش مرکزی و نرمال‌سازی، و با model.encode_image بردار ۵۱۲ بعدی می‌گیرد. encode_texts جمله‌ها را توکنایز می‌کند و با model.encode_text بردارشان را می‌گیرد. هر دو تابع دکوراتور no_grad دارند تا گرادیان محاسبه نشود و حافظه و زمان هدر نرود. نکته‌ی مهم هر دو، F.normalize است: بردارها را به طول یک می‌رساند، در نتیجه ضرب داخلی دو بردار مستقیماً همان شباهت کسینوسی است و در بقیه‌ی کد فقط با یک ضرب ماتریسی کار می‌کنم. بردار همه‌ی ۱۶۰۰ تصویر یک بار حساب می‌شود، حدود دو دقیقه روی CPU، و در یک فایل ذخیره می‌شود تا در اجراهای بعدی از cache خوانده شود. بعد این بردارها به دو ماتریس تقسیم می‌شوند: ۴۰۰ در ۵۱۲ برای پرس‌وجوها و ۱۲۰۰ در ۵۱۲ برای گالری.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 4 — استخراج بردار ویژگی تصویر و متن</b><br>این بخش کد، پایه‌ی همه‌ی مراحل بعدی است. خط اول مدل و تابع پیش‌پردازش را از open_clip می‌سازد و مدل را در حالت eval می‌گذارد، چون قرار نیست چیزی آموزش ببیند. دو تابع کمکی نوشتم. encode_images فهرست مسیر تصاویر را دسته‌دسته می‌خواند، پیش‌پردازش استاندارد CLIP را اعمال می‌کند، یعنی تغییر اندازه به ۲۲۴ و برش مرکزی و نرمال‌سازی، و با model.encode_image بردار ۵۱۲ بعدی می‌گیرد. encode_texts جمله‌ها را توکنایز می‌کند و با model.encode_text بردارشان را می‌گیرد. هر دو تابع دکوراتور no_grad دارند تا گرادیان محاسبه نشود و حافظه و زمان هدر نرود. نکته‌ی مهم هر دو، F.normalize است: بردارها را به طول یک می‌رساند، در نتیجه ضرب داخلی دو بردار مستقیماً همان شباهت کسینوسی است و در بقیه‌ی کد فقط با یک ضرب ماتریسی کار می‌کنم. بردار همه‌ی ۱۶۰۰ تصویر یک بار حساب می‌شود، حدود دو دقیقه روی CPU، و در یک فایل ذخیره می‌شود تا در اجراهای بعدی از cache خوانده شود. بعد این بردارها به دو ماتریس تقسیم می‌شوند: ۴۰۰ در ۵۱۲ برای پرس‌وجوها و ۱۲۰۰ در ۵۱۲ برای گالری.</div></div><div class="wrap"><div class="frame"><section id="prompts" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۳ · پرامپت‌ها</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;سه نوع برچسب متنی برای هر درجه</h2>
+<div style="display:flex;flex-direction:row-reverse;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;A · برچسب ساده</h3>
+<p style="font-size:24px;line-height:1.6;color:#16233A;text-align:left">“a photo of moderate retinopathy”</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border:2px solid #0E7C7B;border-radius:16px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5;color:#0E7C7B">&#8235;B · جمله‌ی توصیفی پزشکی</h3>
+<p style="font-size:24px;line-height:1.6;color:#16233A;text-align:left">“A fundus image showing moderate non-proliferative diabetic retinopathy with dot and blot hemorrhages and hard exudates”</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;C · مجموعه‌ی توصیف‌ها</h3>
+<p style="font-size:28px;line-height:1.6;color:#4A5568">&#8235;سه جمله‌ی توصیفی برای هر درجه؛ بردار کلاس = میانگین نرمال‌شده‌ی آن‌ها.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px;align-items:center">
+<p style="flex:1;font-size:28px;line-height:1.7;color:#4A5568">&#8235;شباهت متن با متن: بردار جمله‌های ساده‌ی کلاس‌ها به هم خیلی نزدیک‌اند؛ جمله‌های توصیفی کلاس «سالم» را از بقیه دورتر می‌کنند.</p>
+<img src="../outputs/text_similarity.png" alt="ماتریس شباهت کسینوسی بین بردار جمله‌های ساده و جمله‌های توصیفی" style="width:860px;height:324px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>ایده‌ی اصلی تمرین همین اسلاید است. برای هر کدام از پنج درجه‌ی بیماری سه نوع متن تعریف کردم تا اثر توصیف پزشکی را اندازه بگیرم. نوع A برچسب ساده است به سبک معمول Zero-Shot، مثل «a photo of moderate retinopathy». نوع B برای هر درجه یک جمله‌ی توصیفی است که علائم بالینی همان درجه را می‌گوید، همان‌طور که در متون چشم‌پزشکی می‌آید: برای سالم، دیسک اپتیک و رگ‌های واضح؛ برای خفیف، چند میکروآنوریسم؛ برای متوسط، خونریزی‌های نقطه‌ای و اگزودای سخت؛ برای شدید، خونریزی گسترده و venous beading؛ و برای پرولیفراتیو، رگ‌زایی جدید. سه جمله‌ی نمونه‌ی صورت تمرین هم در همین فهرست هستند. نوع C یک Prompt Ensemble است: برای هر درجه سه جمله‌ی توصیفی متفاوت، که بردارهایشان میانگین‌گیری و دوباره نرمال می‌شود تا یک بردار نماینده برای کلاس به دست آید. قبل از طبقه‌بندی، شباهت خود جمله‌ها با هم را هم رسم کردم که در تصویر پایین است. هر چه جمله‌های کلاس‌های مختلف در فضای CLIP از هم دورتر باشند، جدا کردن کلاس‌ها ساده‌تر است. جمله‌های ساده فقط در یک کلمه با هم فرق دارند و بردارهایشان خیلی به هم نزدیک است؛ جمله‌های توصیفی تمایز بیشتری ایجاد می‌کنند، مخصوصاً بین سالم و بیمار.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 5 — سه نوع برچسب متنی برای هر درجه</b><br>ایده‌ی اصلی تمرین همین اسلاید است. برای هر کدام از پنج درجه‌ی بیماری سه نوع متن تعریف کردم تا اثر توصیف پزشکی را اندازه بگیرم. نوع A برچسب ساده است به سبک معمول Zero-Shot، مثل «a photo of moderate retinopathy». نوع B برای هر درجه یک جمله‌ی توصیفی است که علائم بالینی همان درجه را می‌گوید، همان‌طور که در متون چشم‌پزشکی می‌آید: برای سالم، دیسک اپتیک و رگ‌های واضح؛ برای خفیف، چند میکروآنوریسم؛ برای متوسط، خونریزی‌های نقطه‌ای و اگزودای سخت؛ برای شدید، خونریزی گسترده و venous beading؛ و برای پرولیفراتیو، رگ‌زایی جدید. سه جمله‌ی نمونه‌ی صورت تمرین هم در همین فهرست هستند. نوع C یک Prompt Ensemble است: برای هر درجه سه جمله‌ی توصیفی متفاوت، که بردارهایشان میانگین‌گیری و دوباره نرمال می‌شود تا یک بردار نماینده برای کلاس به دست آید. قبل از طبقه‌بندی، شباهت خود جمله‌ها با هم را هم رسم کردم که در تصویر پایین است. هر چه جمله‌های کلاس‌های مختلف در فضای CLIP از هم دورتر باشند، جدا کردن کلاس‌ها ساده‌تر است. جمله‌های ساده فقط در یک کلمه با هم فرق دارند و بردارهایشان خیلی به هم نزدیک است؛ جمله‌های توصیفی تمایز بیشتری ایجاد می‌کنند، مخصوصاً بین سالم و بیمار.</div></div><div class="wrap"><div class="frame"><section id="zeroshot" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۴ · تشخیص Zero-Shot</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;شباهت کسینوسی، ضریب دما و softmax</h2>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;line-height:1.5;color:#16233A;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:20px 32px;text-align:center">p(k | x) = softmax_k( 100 · cos( f_img(x), f_txt(t_k) ) )</p>
+<div style="display:flex;flex-direction:row-reverse;gap:40px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;نقش ضریب 100 برای یک تصویر سالم</h3>
+<table style="font-size:26px;color:#16233A;background:#FFFFFF;border-radius:12px;text-align:center">
+<tr><th style="width:24%">scale 100</th><th style="width:22%">scale 1</th><th style="width:20%">cosine</th><th style="width:34%;text-align:left">sentence</th></tr>
+<tr style="background:#E3F1EF"><td>0.739</td><td>0.205</td><td>0.372</td><td>No DR (true)</td></tr>
+<tr><td>0.019</td><td>0.197</td><td>0.335</td><td>Mild</td></tr>
+<tr><td>0.022</td><td>0.197</td><td>0.337</td><td>Moderate</td></tr>
+<tr><td>0.163</td><td>0.201</td><td>0.357</td><td>Severe</td></tr>
+<tr><td>0.058</td><td>0.199</td><td>0.347</td><td>PDR</td></tr>
+</table>
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.65;color:#E6EAF0;background:#16233A;border-radius:16px;padding:28px 32px;text-align:left;white-space:nowrap">LOGIT_SCALE = model.logit_scale.exp().item()&nbsp;&nbsp;# 100<br><br>def zero_shot_probs(image_emb, text_emb,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scale=LOGIT_SCALE):<br>&nbsp;&nbsp;logits = scale * image_emb @ text_emb.T<br>&nbsp;&nbsp;return torch.softmax(logits, dim=-1)<br><br>probs = zero_shot_probs(emb_q, txt_desc)<br>pred&nbsp; = probs.argmax(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# (400,)</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>روش Zero-Shot در عمل فقط چند خط کد است. ماتریس بردار تصاویر پرس‌وجو، ۴۰۰ در ۵۱۲، در ترانهاده‌ی ماتریس بردار جمله‌ها، ۵ در ۵۱۲، ضرب می‌شود. چون بردارها نرمال‌اند، نتیجه یک ماتریس ۴۰۰ در ۵ از شباهت‌های کسینوسی است. این شباهت‌ها در ضریب logit_scale ضرب می‌شوند و روی هر سطر softmax گرفته می‌شود تا برای هر تصویر یک توزیع احتمال روی پنج جمله داشته باشیم؛ کلاس پیش‌بینی‌شده جمله‌ای است که بیشترین احتمال را دارد. ضریب ۱۰۰ از کجا آمده؟ این همان معکوس دمایی است که خود CLIP در آموزش یاد گرفته و من آن را از مدل خوانده‌ام. جدول سمت راست نشان می‌دهد چرا لازم است. برای یک تصویر سالم، شباهت کسینوسی با پنج جمله خیلی به هم نزدیک است: از ۰٫۳۳۵ تا ۰٫۳۷۲، یعنی اختلاف در حد چند صدم. اگر بدون ضریب softmax بگیریم، احتمال‌ها تقریباً یکنواخت می‌شوند، همه حدود بیست درصد. با ضریب ۱۰۰ همین اختلاف‌های کوچک به یک توزیع معنادار تبدیل می‌شود: ۷۴ درصد برای جمله‌ی سالم. نکته‌ی مهم این است که تغییر دما کلاس برنده را عوض نمی‌کند، چون ترتیب شباهت‌ها ثابت است؛ فقط میزان اطمینان توزیع را تغییر می‌دهد.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 6 — شباهت کسینوسی، ضریب دما و softmax</b><br>روش Zero-Shot در عمل فقط چند خط کد است. ماتریس بردار تصاویر پرس‌وجو، ۴۰۰ در ۵۱۲، در ترانهاده‌ی ماتریس بردار جمله‌ها، ۵ در ۵۱۲، ضرب می‌شود. چون بردارها نرمال‌اند، نتیجه یک ماتریس ۴۰۰ در ۵ از شباهت‌های کسینوسی است. این شباهت‌ها در ضریب logit_scale ضرب می‌شوند و روی هر سطر softmax گرفته می‌شود تا برای هر تصویر یک توزیع احتمال روی پنج جمله داشته باشیم؛ کلاس پیش‌بینی‌شده جمله‌ای است که بیشترین احتمال را دارد. ضریب ۱۰۰ از کجا آمده؟ این همان معکوس دمایی است که خود CLIP در آموزش یاد گرفته و من آن را از مدل خوانده‌ام. جدول سمت راست نشان می‌دهد چرا لازم است. برای یک تصویر سالم، شباهت کسینوسی با پنج جمله خیلی به هم نزدیک است: از ۰٫۳۳۵ تا ۰٫۳۷۲، یعنی اختلاف در حد چند صدم. اگر بدون ضریب softmax بگیریم، احتمال‌ها تقریباً یکنواخت می‌شوند، همه حدود بیست درصد. با ضریب ۱۰۰ همین اختلاف‌های کوچک به یک توزیع معنادار تبدیل می‌شود: ۷۴ درصد برای جمله‌ی سالم. نکته‌ی مهم این است که تغییر دما کلاس برنده را عوض نمی‌کند، چون ترتیب شباهت‌ها ثابت است؛ فقط میزان اطمینان توزیع را تغییر می‌دهد.</div></div><div class="wrap"><div class="frame"><section id="results" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۴ · نتایج Zero-Shot</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;اثر توصیف پزشکی روی 400 تصویر Query</h2>
+<table style="font-size:28px;color:#16233A;background:#FFFFFF;border-radius:12px;text-align:center">
+<tr><th style="width:16%">AUC</th><th style="width:16%">κ</th><th style="width:18%">Balanced</th><th style="width:16%">Accuracy</th><th style="width:34%;text-align:right">روش</th></tr>
+<tr><td>0.518</td><td>−0.02</td><td>13.0%</td><td>14.3%</td><td>&#8235;A · برچسب ساده</td></tr>
+<tr style="background:#E3F1EF"><td>0.691</td><td>0.23</td><td>26.1%</td><td>44.8%</td><td>&#8235;B · جمله‌ی توصیفی</td></tr>
+<tr><td>0.725</td><td>0.12</td><td>20.5%</td><td>43.8%</td><td>&#8235;C · مجموعه‌ی توصیف‌ها</td></tr>
+</table>
+<img src="../outputs/confusion_matrices.png" alt="ماتریس درهم‌ریختگی برای سه نوع پرامپت" style="width:1664px;height:330px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;خط پایه‌ی کلاس اکثریت 43.5% است. با پرامپت B مدل تقریباً فقط «سالم» یا «Severe» می‌گوید و درجه‌های 1 و 2 را هرگز پیش‌بینی نمی‌کند.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>این نتیجه‌ی اصلی بخش Zero-Shot است. چهار معیار گزارش کرده‌ام: دقت معمولی؛ دقت متوازن که میانگین recall کلاس‌هاست و برای داده‌ی نامتوازن منصفانه‌تر است؛ کاپای وزن‌دار درجه دو که معیار استاندارد درجه‌بندی رتینوپاتی است و اشتباه‌های دورتر را بیشتر جریمه می‌کند؛ و AUC برای تفکیک دودویی بیمار از سالم. با برچسب ساده، دقت فقط ۱۴ درصد است و AUC تقریباً نیم؛ یعنی مدل عملاً تصادفی است و در ماتریس درهم‌ریختگی سمت چپ دیده می‌شود که بیشتر تصاویر سالم را هم severe می‌نامد. با جمله‌های توصیفی دقت به ۴۵ درصد و AUC به ۰٫۶۹ می‌رسد؛ یعنی واژگان بالینی مثل optic disc و hemorrhage و exudate جمله را به ناحیه‌ی درست‌تری از فضای مشترک می‌برند. اما باید صادق باشم: خط پایه‌ی حدس زدنِ همیشه «سالم» ۴۳٫۵ درصد است، پس ۴۵ درصد فقط کمی بهتر از آن است. ماتریس وسط دلیلش را نشان می‌دهد: مدل تقریباً فقط بین سالم و Severe انتخاب می‌کند و درجه‌های یک و دو را هرگز پیش‌بینی نمی‌کند. تفاوت این درجه‌ها ضایعات خیلی ریز مثل میکروآنوریسم است که در ورودی ۲۲۴ در ۲۲۴ تقریباً دیده نمی‌شوند و در داده‌ی آموزشی عمومی CLIP هم نمونه‌ی کافی نداشته‌اند. Ensemble تفکیک بیمار و سالم را بهتر کرد، AUC برابر ۰٫۷۲، ولی پیش‌بینی‌ها را بیشتر به سمت سالم برد.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 7 — اثر توصیف پزشکی روی 400 تصویر Query</b><br>این نتیجه‌ی اصلی بخش Zero-Shot است. چهار معیار گزارش کرده‌ام: دقت معمولی؛ دقت متوازن که میانگین recall کلاس‌هاست و برای داده‌ی نامتوازن منصفانه‌تر است؛ کاپای وزن‌دار درجه دو که معیار استاندارد درجه‌بندی رتینوپاتی است و اشتباه‌های دورتر را بیشتر جریمه می‌کند؛ و AUC برای تفکیک دودویی بیمار از سالم. با برچسب ساده، دقت فقط ۱۴ درصد است و AUC تقریباً نیم؛ یعنی مدل عملاً تصادفی است و در ماتریس درهم‌ریختگی سمت چپ دیده می‌شود که بیشتر تصاویر سالم را هم severe می‌نامد. با جمله‌های توصیفی دقت به ۴۵ درصد و AUC به ۰٫۶۹ می‌رسد؛ یعنی واژگان بالینی مثل optic disc و hemorrhage و exudate جمله را به ناحیه‌ی درست‌تری از فضای مشترک می‌برند. اما باید صادق باشم: خط پایه‌ی حدس زدنِ همیشه «سالم» ۴۳٫۵ درصد است، پس ۴۵ درصد فقط کمی بهتر از آن است. ماتریس وسط دلیلش را نشان می‌دهد: مدل تقریباً فقط بین سالم و Severe انتخاب می‌کند و درجه‌های یک و دو را هرگز پیش‌بینی نمی‌کند. تفاوت این درجه‌ها ضایعات خیلی ریز مثل میکروآنوریسم است که در ورودی ۲۲۴ در ۲۲۴ تقریباً دیده نمی‌شوند و در داده‌ی آموزشی عمومی CLIP هم نمونه‌ی کافی نداشته‌اند. Ensemble تفکیک بیمار و سالم را بهتر کرد، AUC برابر ۰٫۷۲، ولی پیش‌بینی‌ها را بیشتر به سمت سالم برد.</div></div><div class="wrap"><div class="frame"><section id="t2i" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۵ · جستجوی معنایی</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;جستجوی متن → تصویر در Gallery</h2>
+<div style="display:flex;flex-direction:row-reverse;gap:40px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;justify-content:center">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.65;color:#E6EAF0;background:#16233A;border-radius:16px;padding:24px 28px;text-align:left;white-space:nowrap">def retrieve(text, gallery_emb, k=10):<br>&nbsp;&nbsp;sims = gallery_emb @ encode_texts([text])[0]<br>&nbsp;&nbsp;order = np.argsort(-sims)<br>&nbsp;&nbsp;return order[:k], sims</p>
+<table style="font-size:26px;color:#16233A;background:#FFFFFF;border-radius:12px;text-align:center">
+<tr><th style="width:20%">P@5</th><th style="width:24%">Base rate</th><th style="width:56%;text-align:right">پرس‌وجو</th></tr>
+<tr><td>1.0</td><td>0.45</td><td>&#8235;شبکیه‌ی سالم</td></tr>
+<tr><td>0.8</td><td>0.18</td><td>Severe NPDR</td></tr>
+<tr><td>1.0</td><td>0.43</td><td>&#8235;خونریزی و اگزودا (درجه ≥ 2)</td></tr>
+<tr><td>0.0</td><td>0.12</td><td>Mild NPDR</td></tr>
+<tr style="background:#E3F1EF"><td>0.51</td><td>0.28</td><td>&#8235;میانگین هر ۷ پرس‌وجو</td></tr>
+</table>
+</div>
+<img src="../outputs/text_to_image_retrieval.png" alt="پنج تصویر برتر گالری برای پنج پرس‌وجوی متنی؛ قاب سبز مرتبط و قرمز نامرتبط" style="width:500px;height:604px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>در جستجوی معنایی جهت مقایسه برعکس می‌شود: یک توصیف متنی می‌دهیم و ۱۲۰۰ تصویر گالری بر اساس شباهت کسینوسی با آن مرتب می‌شوند. تابع retrieve فقط سه خط است: بردار جمله را می‌گیرد، در ماتریس گالری ضرب می‌کند و با argsort مرتب می‌کند. هفت پرس‌وجو تعریف کردم: پنج جمله‌ی توصیفی درجه‌ها و دو پرس‌وجوی آزاد که مستقیماً برچسب کلاس نیستند؛ یکی توصیف ضایعه است، «شبکیه با خونریزی‌های قرمز و اگزودای زرد»، که تصاویر مرتبطش درجه‌ی دو به بالا هستند، و دیگری توصیف کیفیت، «تصویر تار با آرتیفکت»، که با ستون کیفیت دیتاست سنجیده می‌شود. معیار اصلی Precision در پنج نتیجه‌ی اول است و آن را با Base rate مقایسه می‌کنم، یعنی کسر تصاویر مرتبط در کل گالری که همان دقت یک جستجوی تصادفی است. برای شبکیه‌ی سالم و برای توصیف ضایعه، هر پنج نتیجه‌ی اول درست‌اند. برای Severe چهار از پنج درست است در حالی که فقط ۱۸ درصد گالری این درجه را دارد. ولی برای Mild هیچ‌کدام از پنج نتیجه درست نیست، که با نتیجه‌ی طبقه‌بندی هم‌خوان است. میانگین هفت پرس‌وجو ۰٫۵۱ است در برابر ۰٫۲۸ تصادفی. پس جستجو از طبقه‌بندی بهتر کار می‌کند، چون فقط به چند نتیجه‌ی اول نگاه می‌کنیم و CLIP علائم واضح و درشت را خوب می‌گیرد. در تصویر، قاب سبز یعنی مرتبط و قرمز یعنی نامرتبط.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 8 — جستجوی متن → تصویر در Gallery</b><br>در جستجوی معنایی جهت مقایسه برعکس می‌شود: یک توصیف متنی می‌دهیم و ۱۲۰۰ تصویر گالری بر اساس شباهت کسینوسی با آن مرتب می‌شوند. تابع retrieve فقط سه خط است: بردار جمله را می‌گیرد، در ماتریس گالری ضرب می‌کند و با argsort مرتب می‌کند. هفت پرس‌وجو تعریف کردم: پنج جمله‌ی توصیفی درجه‌ها و دو پرس‌وجوی آزاد که مستقیماً برچسب کلاس نیستند؛ یکی توصیف ضایعه است، «شبکیه با خونریزی‌های قرمز و اگزودای زرد»، که تصاویر مرتبطش درجه‌ی دو به بالا هستند، و دیگری توصیف کیفیت، «تصویر تار با آرتیفکت»، که با ستون کیفیت دیتاست سنجیده می‌شود. معیار اصلی Precision در پنج نتیجه‌ی اول است و آن را با Base rate مقایسه می‌کنم، یعنی کسر تصاویر مرتبط در کل گالری که همان دقت یک جستجوی تصادفی است. برای شبکیه‌ی سالم و برای توصیف ضایعه، هر پنج نتیجه‌ی اول درست‌اند. برای Severe چهار از پنج درست است در حالی که فقط ۱۸ درصد گالری این درجه را دارد. ولی برای Mild هیچ‌کدام از پنج نتیجه درست نیست، که با نتیجه‌ی طبقه‌بندی هم‌خوان است. میانگین هفت پرس‌وجو ۰٫۵۱ است در برابر ۰٫۲۸ تصادفی. پس جستجو از طبقه‌بندی بهتر کار می‌کند، چون فقط به چند نتیجه‌ی اول نگاه می‌کنیم و CLIP علائم واضح و درشت را خوب می‌گیرد. در تصویر، قاب سبز یعنی مرتبط و قرمز یعنی نامرتبط.</div></div><div class="wrap"><div class="frame"><section id="i2i" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۶ · مقایسه با روش‌های نظارت‌شده</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;ضعف از رمزگذار تصویر است یا از تطابق متن؟</h2>
+<div style="display:flex;flex-direction:row-reverse;gap:32px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:18px">
+<table style="font-size:28px;color:#16233A;background:#FFFFFF;border-radius:12px;text-align:center">
+<tr><th style="width:20%">AUC</th><th style="width:16%">κ</th><th style="width:22%">Accuracy</th><th style="width:42%;text-align:right">روش</th></tr>
+<tr><td>0.691</td><td>0.23</td><td>44.8%</td><td>Zero-Shot (B)</td></tr>
+<tr><td>0.842</td><td>0.48</td><td>54.5%</td><td>k-NN, k = 10</td></tr>
+<tr style="background:#E3F1EF"><td>0.905</td><td>0.71</td><td>63.5%</td><td>Linear Probe</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;k-NN و Linear Probe از برچسب‌های Gallery استفاده می‌کنند. بردارهای تصویر اطلاعات بیماری را دارند؛ گلوگاه، تطابق متن عمومی با تصویر پزشکی است.</p>
+</div>
+<img src="../outputs/summary.png" alt="نمودار میله‌ای مقایسه‌ی سه پرامپت Zero-Shot با k-NN و Linear Probe" style="width:900px;height:390px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+</div>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.65;color:#E6EAF0;background:#16233A;border-radius:16px;padding:22px 32px;text-align:left;white-space:nowrap">nn_idx = np.argsort(-(emb_q @ emb_g.T), axis=1)[:, :10]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# k-NN<br>probe&nbsp; = LogisticRegression(C=10, max_iter=2000).fit(emb_g, y_g)&nbsp;&nbsp;# linear probe</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>بعد از دیدن نتیجه‌ی متوسط Zero-Shot این سؤال پیش می‌آید: مشکل از کجاست؟ آیا رمزگذار تصویر CLIP اصلاً اطلاعات بیماری را در بردارش ندارد، یا مشکل از تطابق جمله با تصویر است؟ برای جواب دادن، از همان بردارهای تصویر به دو روش دیگر استفاده کردم که از برچسب‌های گالری کمک می‌گیرند و دیگر Zero-Shot نیستند. روش اول k-NN یا همان جستجوی تصویر به تصویر است: برای هر تصویر پرس‌وجو، ده تصویر شبیه‌تر در گالری پیدا می‌شود و درجه‌ی اکثریت آن‌ها پیش‌بینی است. روش دوم Linear Probe است: یک رگرسیون لجستیک ساده روی بردارهای گالری آموزش می‌بیند و روی پرس‌وجوها آزمایش می‌شود. هر کدام یک خط کد است که پایین اسلاید آمده. نتیجه روشن است: k-NN به ۵۴٫۵ درصد و Linear Probe به ۶۳٫۵ درصد دقت و کاپای ۰٫۷۱ و AUC برابر ۰٫۹ می‌رسد. پس بردارهای تصویر CLIP اطلاعات مربوط به بیماری را دارند و یک طبقه‌بند خطی ساده می‌تواند آن را بیرون بکشد. گلوگاه، طرف متن است: CLIP عمومی روی زوج‌های تصویر و متن اینترنتی آموزش دیده و ارتباط دقیق بین اصطلاحات چشم‌پزشکی و ظاهر ضایعات را خوب یاد نگرفته. این همان دلیلی است که مدل‌های تخصصی پزشکی مثل نسخه‌های آموزش‌دیده روی داده‌ی پزشکی ساخته شده‌اند.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 9 — ضعف از رمزگذار تصویر است یا از تطابق متن؟</b><br>بعد از دیدن نتیجه‌ی متوسط Zero-Shot این سؤال پیش می‌آید: مشکل از کجاست؟ آیا رمزگذار تصویر CLIP اصلاً اطلاعات بیماری را در بردارش ندارد، یا مشکل از تطابق جمله با تصویر است؟ برای جواب دادن، از همان بردارهای تصویر به دو روش دیگر استفاده کردم که از برچسب‌های گالری کمک می‌گیرند و دیگر Zero-Shot نیستند. روش اول k-NN یا همان جستجوی تصویر به تصویر است: برای هر تصویر پرس‌وجو، ده تصویر شبیه‌تر در گالری پیدا می‌شود و درجه‌ی اکثریت آن‌ها پیش‌بینی است. روش دوم Linear Probe است: یک رگرسیون لجستیک ساده روی بردارهای گالری آموزش می‌بیند و روی پرس‌وجوها آزمایش می‌شود. هر کدام یک خط کد است که پایین اسلاید آمده. نتیجه روشن است: k-NN به ۵۴٫۵ درصد و Linear Probe به ۶۳٫۵ درصد دقت و کاپای ۰٫۷۱ و AUC برابر ۰٫۹ می‌رسد. پس بردارهای تصویر CLIP اطلاعات مربوط به بیماری را دارند و یک طبقه‌بند خطی ساده می‌تواند آن را بیرون بکشد. گلوگاه، طرف متن است: CLIP عمومی روی زوج‌های تصویر و متن اینترنتی آموزش دیده و ارتباط دقیق بین اصطلاحات چشم‌پزشکی و ظاهر ضایعات را خوب یاد نگرفته. این همان دلیلی است که مدل‌های تخصصی پزشکی مثل نسخه‌های آموزش‌دیده روی داده‌ی پزشکی ساخته شده‌اند.</div></div><div class="wrap"><div class="frame"><section id="qa" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;آمادگی برای پرسش</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;پرسش‌های احتمالی استاد</h2>
+<div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;Zero-Shot یعنی چه؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;هیچ نمونه‌ی برچسب‌دار از این کلاس‌ها دیده نشده؛ کلاس‌ها فقط با متن تعریف می‌شوند.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;چرا Accuracy کافی نیست؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;داده نامتوازن است؛ Balanced Accuracy و κ وزن‌دار منصفانه‌ترند.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;چرا Ensemble بهتر نشد؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;AUC بهتر شد، ولی میانگین‌گیری پیش‌بینی‌ها را به سمت «سالم» برد.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;چطور می‌شود نتیجه را بهتر کرد؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;CLIP تخصصی پزشکی، ورودی با وضوح بالاتر، یا fine-tune با چند نمونه.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>این اسلاید برای آمادگی خودم است. Zero-Shot: مدل هیچ تصویر برچسب‌دار شبکیه برای این کار ندیده و هیچ وزنی به‌روز نشده؛ کلاس‌ها فقط با جمله تعریف شده‌اند و تصمیم از مقایسه‌ی شباهت می‌آید. چرا دقت کافی نیست: ۴۳٫۵ درصد تصاویر سالم‌اند، پس مدلی که همیشه بگوید سالم ۴۳٫۵ درصد دقت دارد؛ دقت متوازن میانگین recall کلاس‌هاست و کاپای وزن‌دار هم ترتیب درجه‌ها را در نظر می‌گیرد، یعنی اشتباه گرفتن درجه‌ی صفر با چهار بدتر از صفر با یک حساب می‌شود. چرا Ensemble بهتر نشد: میانگین سه جمله بردار کلاس را هموارتر می‌کند؛ این برای تفکیک کلی بیمار از سالم خوب بود و AUC را بالا برد، ولی مرز بین درجه‌ها را محوتر کرد. بهبود: مدل‌های CLIP آموزش‌دیده روی داده‌ی پزشکی، ورودی با وضوح بیشتر چون ضایعات ریزند، یا روش‌های few-shot مثل Linear Probe که دیدیم با همان بردارها به ۶۳ درصد می‌رسد. چند پرسش دیگر: چرا نرمال‌سازی L2؟ تا ضرب داخلی همان کسینوس باشد و طول بردار اثر نگذارد. چرا وزن LAION و نه OpenAI؟ معماری یکی است و فقط دسترسی به سرور وزن‌ها مسئله بود؛ با یک متغیر عوض می‌شود. تفاوت P@5 و AP؟ اولی فقط پنج نتیجه‌ی اول را می‌بیند و دومی کل رتبه‌بندی را. چرا تقسیم در سطح بیمار؟ چون از هر چشم دو تصویر داریم و بدون آن k-NN تصویر دوم همان چشم را پیدا می‌کرد.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 10 — پرسش‌های احتمالی استاد</b><br>این اسلاید برای آمادگی خودم است. Zero-Shot: مدل هیچ تصویر برچسب‌دار شبکیه برای این کار ندیده و هیچ وزنی به‌روز نشده؛ کلاس‌ها فقط با جمله تعریف شده‌اند و تصمیم از مقایسه‌ی شباهت می‌آید. چرا دقت کافی نیست: ۴۳٫۵ درصد تصاویر سالم‌اند، پس مدلی که همیشه بگوید سالم ۴۳٫۵ درصد دقت دارد؛ دقت متوازن میانگین recall کلاس‌هاست و کاپای وزن‌دار هم ترتیب درجه‌ها را در نظر می‌گیرد، یعنی اشتباه گرفتن درجه‌ی صفر با چهار بدتر از صفر با یک حساب می‌شود. چرا Ensemble بهتر نشد: میانگین سه جمله بردار کلاس را هموارتر می‌کند؛ این برای تفکیک کلی بیمار از سالم خوب بود و AUC را بالا برد، ولی مرز بین درجه‌ها را محوتر کرد. بهبود: مدل‌های CLIP آموزش‌دیده روی داده‌ی پزشکی، ورودی با وضوح بیشتر چون ضایعات ریزند، یا روش‌های few-shot مثل Linear Probe که دیدیم با همان بردارها به ۶۳ درصد می‌رسد. چند پرسش دیگر: چرا نرمال‌سازی L2؟ تا ضرب داخلی همان کسینوس باشد و طول بردار اثر نگذارد. چرا وزن LAION و نه OpenAI؟ معماری یکی است و فقط دسترسی به سرور وزن‌ها مسئله بود؛ با یک متغیر عوض می‌شود. تفاوت P@5 و AP؟ اولی فقط پنج نتیجه‌ی اول را می‌بیند و دومی کل رتبه‌بندی را. چرا تقسیم در سطح بیمار؟ چون از هر چشم دو تصویر داریم و بدون آن k-NN تصویر دوم همان چشم را پیدا می‌کرد.</div></div><div class="wrap"><div class="frame"><section id="summary" style="background:#16233A;color:#F7F5F0;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:28px;font-weight:700;color:#F2B544">&#8235;جمع‌بندی</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.4">&#8235;توصیف پزشکی دقت CLIP را سه برابر می‌کند، ولی برای درجه‌بندی ریز کافی نیست</h2>
+<div style="flex:1"></div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;پرامپت</h3>
+<p style="font-size:28px;line-height:1.7;color:#C9D3E0">&#8235;برچسب ساده 14%؛ جمله‌ی توصیفی 45%؛ خط پایه 43.5%.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;جستجو</h3>
+<p style="font-size:28px;line-height:1.7;color:#C9D3E0">&#8235;P@5 = 0.51 در برابر 0.28؛ برای علائم واضح خوب، برای Mild ضعیف.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:2px solid #F2B544;padding:24px 0 0 0">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;گلوگاه</h3>
+<p style="font-size:28px;line-height:1.7;color:#C9D3E0">&#8235;تطابق متن و تصویر؛ Linear Probe روی همان بردارها به 63.5% می‌رسد.</p>
+</div>
+</div>
+<aside>جمع‌بندی می‌کنم. اول، نوع پرامپت خیلی مهم است: با برچسب ساده CLIP عملاً تصادفی است، ۱۴ درصد، و با جمله‌های توصیفی پزشکی به ۴۵ درصد می‌رسد. دوم، با این حال Zero-Shot با CLIP عمومی برای درجه‌بندی ریز رتینوپاتی کافی نیست؛ دقت فقط کمی بالاتر از حدس کلاس اکثریت است و درجه‌های یک و دو تشخیص داده نمی‌شوند. سوم، جستجوی معنایی متن به تصویر کاربردی‌تر است: برای توصیف‌های واضح مثل شبکیه‌ی سالم یا خونریزی و اگزودا، نتایج اول تقریباً همه درست‌اند. چهارم، آزمایش k-NN و Linear Probe نشان داد بردارهای تصویر CLIP اطلاعات بیماری را دارند و ضعف اصلی در تطابق متن عمومی با تصویر پزشکی است. پس کاربرد واقع‌بینانه‌ی این سیستم، جستجو و غربالگری اولیه است نه تشخیص نهایی، و برای تشخیص باید از مدل تخصصی پزشکی یا مقدار کمی داده‌ی برچسب‌دار استفاده کرد. ممنون از توجه‌تان.</aside>
+</section>
+</div><div class="notes"><b>اسلاید 11 — توصیف پزشکی دقت CLIP را سه برابر می‌کند، ولی برای درجه‌بندی ریز کافی نیست</b><br>جمع‌بندی می‌کنم. اول، نوع پرامپت خیلی مهم است: با برچسب ساده CLIP عملاً تصادفی است، ۱۴ درصد، و با جمله‌های توصیفی پزشکی به ۴۵ درصد می‌رسد. دوم، با این حال Zero-Shot با CLIP عمومی برای درجه‌بندی ریز رتینوپاتی کافی نیست؛ دقت فقط کمی بالاتر از حدس کلاس اکثریت است و درجه‌های یک و دو تشخیص داده نمی‌شوند. سوم، جستجوی معنایی متن به تصویر کاربردی‌تر است: برای توصیف‌های واضح مثل شبکیه‌ی سالم یا خونریزی و اگزودا، نتایج اول تقریباً همه درست‌اند. چهارم، آزمایش k-NN و Linear Probe نشان داد بردارهای تصویر CLIP اطلاعات بیماری را دارند و ضعف اصلی در تطابق متن عمومی با تصویر پزشکی است. پس کاربرد واقع‌بینانه‌ی این سیستم، جستجو و غربالگری اولیه است نه تشخیص نهایی، و برای تشخیص باید از مدل تخصصی پزشکی یا مقدار کمی داده‌ی برچسب‌دار استفاده کرد. ممنون از توجه‌تان.</div></div><script>function fit(){document.querySelectorAll('.frame').forEach(f=>{f.firstElementChild.style.transform='scale('+(f.clientWidth/1920)+')'})}
+addEventListener('resize',fit);addEventListener('load',fit);fit();</script></body></html>

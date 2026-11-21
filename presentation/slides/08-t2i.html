@@ -1,0 +1,20 @@
+<section id="t2i" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۵ · جستجوی معنایی</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;جستجوی متن → تصویر در Gallery</h2>
+<div style="display:flex;flex-direction:row-reverse;gap:40px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;justify-content:center">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.65;color:#E6EAF0;background:#16233A;border-radius:16px;padding:24px 28px;text-align:left;white-space:nowrap">def retrieve(text, gallery_emb, k=10):<br>&nbsp;&nbsp;sims = gallery_emb @ encode_texts([text])[0]<br>&nbsp;&nbsp;order = np.argsort(-sims)<br>&nbsp;&nbsp;return order[:k], sims</p>
+<table style="font-size:26px;color:#16233A;background:#FFFFFF;border-radius:12px;text-align:center">
+<tr><th style="width:20%">P@5</th><th style="width:24%">Base rate</th><th style="width:56%;text-align:right">پرس‌وجو</th></tr>
+<tr><td>1.0</td><td>0.45</td><td>&#8235;شبکیه‌ی سالم</td></tr>
+<tr><td>0.8</td><td>0.18</td><td>Severe NPDR</td></tr>
+<tr><td>1.0</td><td>0.43</td><td>&#8235;خونریزی و اگزودا (درجه ≥ 2)</td></tr>
+<tr><td>0.0</td><td>0.12</td><td>Mild NPDR</td></tr>
+<tr style="background:#E3F1EF"><td>0.51</td><td>0.28</td><td>&#8235;میانگین هر ۷ پرس‌وجو</td></tr>
+</table>
+</div>
+<img src="../../outputs/text_to_image_retrieval.png" alt="پنج تصویر برتر گالری برای پنج پرس‌وجوی متنی؛ قاب سبز مرتبط و قرمز نامرتبط" style="width:500px;height:604px;object-fit:contain;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px">
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>در جستجوی معنایی جهت مقایسه برعکس می‌شود: یک توصیف متنی می‌دهیم و ۱۲۰۰ تصویر گالری بر اساس شباهت کسینوسی با آن مرتب می‌شوند. تابع retrieve فقط سه خط است: بردار جمله را می‌گیرد، در ماتریس گالری ضرب می‌کند و با argsort مرتب می‌کند. هفت پرس‌وجو تعریف کردم: پنج جمله‌ی توصیفی درجه‌ها و دو پرس‌وجوی آزاد که مستقیماً برچسب کلاس نیستند؛ یکی توصیف ضایعه است، «شبکیه با خونریزی‌های قرمز و اگزودای زرد»، که تصاویر مرتبطش درجه‌ی دو به بالا هستند، و دیگری توصیف کیفیت، «تصویر تار با آرتیفکت»، که با ستون کیفیت دیتاست سنجیده می‌شود. معیار اصلی Precision در پنج نتیجه‌ی اول است و آن را با Base rate مقایسه می‌کنم، یعنی کسر تصاویر مرتبط در کل گالری که همان دقت یک جستجوی تصادفی است. برای شبکیه‌ی سالم و برای توصیف ضایعه، هر پنج نتیجه‌ی اول درست‌اند. برای Severe چهار از پنج درست است در حالی که فقط ۱۸ درصد گالری این درجه را دارد. ولی برای Mild هیچ‌کدام از پنج نتیجه درست نیست، که با نتیجه‌ی طبقه‌بندی هم‌خوان است. میانگین هفت پرس‌وجو ۰٫۵۱ است در برابر ۰٫۲۸ تصادفی. پس جستجو از طبقه‌بندی بهتر کار می‌کند، چون فقط به چند نتیجه‌ی اول نگاه می‌کنیم و CLIP علائم واضح و درشت را خوب می‌گیرد. در تصویر، قاب سبز یعنی مرتبط و قرمز یعنی نامرتبط.</aside>
+</section>

@@ -1,0 +1,24 @@
+<section id="qa" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;آمادگی برای پرسش</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;پرسش‌های احتمالی استاد</h2>
+<div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;Zero-Shot یعنی چه؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;هیچ نمونه‌ی برچسب‌دار از این کلاس‌ها دیده نشده؛ کلاس‌ها فقط با متن تعریف می‌شوند.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;چرا Accuracy کافی نیست؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;داده نامتوازن است؛ Balanced Accuracy و κ وزن‌دار منصفانه‌ترند.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;چرا Ensemble بهتر نشد؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;AUC بهتر شد، ولی میانگین‌گیری پیش‌بینی‌ها را به سمت «سالم» برد.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:16px;padding:28px 32px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;چطور می‌شود نتیجه را بهتر کرد؟</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;CLIP تخصصی پزشکی، ورودی با وضوح بالاتر، یا fine-tune با چند نمونه.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>این اسلاید برای آمادگی خودم است. Zero-Shot: مدل هیچ تصویر برچسب‌دار شبکیه برای این کار ندیده و هیچ وزنی به‌روز نشده؛ کلاس‌ها فقط با جمله تعریف شده‌اند و تصمیم از مقایسه‌ی شباهت می‌آید. چرا دقت کافی نیست: ۴۳٫۵ درصد تصاویر سالم‌اند، پس مدلی که همیشه بگوید سالم ۴۳٫۵ درصد دقت دارد؛ دقت متوازن میانگین recall کلاس‌هاست و کاپای وزن‌دار هم ترتیب درجه‌ها را در نظر می‌گیرد، یعنی اشتباه گرفتن درجه‌ی صفر با چهار بدتر از صفر با یک حساب می‌شود. چرا Ensemble بهتر نشد: میانگین سه جمله بردار کلاس را هموارتر می‌کند؛ این برای تفکیک کلی بیمار از سالم خوب بود و AUC را بالا برد، ولی مرز بین درجه‌ها را محوتر کرد. بهبود: مدل‌های CLIP آموزش‌دیده روی داده‌ی پزشکی، ورودی با وضوح بیشتر چون ضایعات ریزند، یا روش‌های few-shot مثل Linear Probe که دیدیم با همان بردارها به ۶۳ درصد می‌رسد. چند پرسش دیگر: چرا نرمال‌سازی L2؟ تا ضرب داخلی همان کسینوس باشد و طول بردار اثر نگذارد. چرا وزن LAION و نه OpenAI؟ معماری یکی است و فقط دسترسی به سرور وزن‌ها مسئله بود؛ با یک متغیر عوض می‌شود. تفاوت P@5 و AP؟ اولی فقط پنج نتیجه‌ی اول را می‌بیند و دومی کل رتبه‌بندی را. چرا تقسیم در سطح بیمار؟ چون از هر چشم دو تصویر داریم و بدون آن k-NN تصویر دوم همان چشم را پیدا می‌کرد.</aside>
+</section>

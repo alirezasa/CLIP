@@ -1,0 +1,52 @@
+<section id="clip" style="background:#F7F5F0;color:#16233A;font-family:'Vazirmatn', Tahoma, sans-serif;text-align:right;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;font-weight:700;color:#0E7C7B">&#8235;بخش ۲ · مدل</p>
+<h2 style="font-size:64px;font-weight:700;line-height:1.3">&#8235;معماری CLIP: دو رمزگذار، یک فضای مشترک</h2>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center;text-align:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:row;gap:12px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Image</p>
+<p style="font-size:24px;color:#4A5568">224×224</p>
+</div>
+<x-shape kind="arrow-right" style="width:28px;height:18px;background:#0E7C7B"></x-shape>
+<div style="flex:2;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Image Encoder</p>
+<p style="font-size:24px;color:#4A5568">ViT-B/32 · patch 32×32</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:12px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Text</p>
+<p style="font-size:24px;color:#4A5568">77 tokens</p>
+</div>
+<x-shape kind="arrow-right" style="width:28px;height:18px;background:#0E7C7B"></x-shape>
+<div style="flex:2;display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E2DED5;border-radius:12px;padding:20px 12px">
+<p style="font-size:28px;font-weight:700">Text Encoder</p>
+<p style="font-size:24px;color:#4A5568">Transformer</p>
+</div>
+</div>
+</div>
+<x-shape kind="arrow-right" style="width:36px;height:22px;background:#0E7C7B"></x-shape>
+<div style="width:380px;display:flex;flex-direction:column;gap:8px;background:#16233A;border-radius:16px;padding:36px 20px">
+<p style="font-size:32px;font-weight:700;color:#F7F5F0">512-d</p>
+<p style="font-size:24px;color:#C9D3E0">L2-normalized</p>
+<p style="font-size:24px;color:#F2B544;font-weight:700">cosine similarity</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row-reverse;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;آموزش Contrastive</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;روی صدها میلیون زوج (تصویر، متن): بردار تصویر و متن متناظر به هم نزدیک، بقیه دور.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;نتیجه</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;طبقه‌بندی = مقایسه‌ی یک تصویر با چند جمله؛ جستجو = مقایسه‌ی یک جمله با چند تصویر.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:32px;font-weight:700;line-height:1.5">&#8235;مدل استفاده‌شده</h3>
+<p style="font-size:28px;line-height:1.7;color:#4A5568">&#8235;open_clip، 151.3M پارامتر، logit_scale = 100</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#8A8F98">CLIP · DeepDRiD</p>
+<aside>CLIP از دو رمزگذار جدا تشکیل شده است. رمزگذار تصویر در اینجا یک Vision Transformer پایه با پچ‌های ۳۲ در ۳۲ است: تصویر ۲۲۴ در ۲۲۴ به ۴۹ پچ تقسیم می‌شود و مثل یک جمله از ترنسفورمر عبور می‌کند. رمزگذار متن هم یک ترنسفورمر است که جمله را تا ۷۷ توکن می‌گیرد. خروجی هر دو با یک لایه‌ی خطی به یک فضای مشترک ۵۱۲ بعدی نگاشت می‌شود. مدل با زیان Contrastive آموزش دیده: در هر batch از زوج‌های تصویر و متن، شباهت زوج‌های درست باید زیاد و شباهت همه‌ی ترکیب‌های غلط کم شود. نتیجه این است که شباهت کسینوسی بین بردار یک تصویر و بردار یک جمله، معیار تطابق آن دو است. با همین یک ایده، بدون هیچ آموزش اضافه، دو کار می‌شود کرد: اگر یک تصویر را با چند جمله مقایسه کنیم طبقه‌بندی Zero-Shot داریم، و اگر یک جمله را با چند تصویر مقایسه کنیم جستجوی معنایی. من از کتابخانه‌ی open_clip با همان معماری ViT-B/32 مدل اصلی و وزن‌های آموزش‌دیده روی LAION-400M استفاده کردم، چون به سرور وزن‌های OpenAI دسترسی نبود؛ با تغییر یک متغیر می‌شود وزن‌های OpenAI را هم بارگذاری کرد. مدل ۱۵۱ میلیون پارامتر دارد و ضریب logit_scale آن ۱۰۰ است که در اسلاید Zero-Shot توضیحش می‌دهم.</aside>
+</section>
